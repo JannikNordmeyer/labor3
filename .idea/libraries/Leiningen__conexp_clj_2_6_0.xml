@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: conexp-clj:2.6.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/conexp-clj/conexp-clj/2.6.0/conexp-clj-2.6.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

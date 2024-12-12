@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: nrepl/drawbridge:0.2.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/nrepl/drawbridge/0.2.1/drawbridge-0.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
