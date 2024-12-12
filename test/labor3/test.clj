@@ -11,3 +11,7 @@
 
 
 (println (intensive? (into #{} (objects rctx)) #(attribute-derivation rctx (object-derivation rctx %))))
+
+
+
+(println (minimal-closure-system #{1 2 3 4} #{#{1 2 3} #{2 3 4} #{1 2}}))

@@ -114,15 +114,55 @@
          (every? #(.contains subsets (reduce set/intersection %)) (disj (powerset subsets) #{})))
   )
 
+(defn minimal-closure-system [base-set subsets]
+  "Returns the Minimal Closure System that Contains the Supplied Subsets."
+  (into #{} (for [x (disj (powerset subsets) #{})] (reduce set/intersection x)))
+  )
+
+(defn maximal-closure-system [base-set subsets]
+  "Returns a Maximal Closure System that is Contained in the Supplied Subsets."
+  (loop [candidates (reverse (sort set/subset? (powerset subsets)))]
+    (if (closure-system? base-set (first candidates))
+      (first candidates)
+      (recur (rest candidates))))
+  )
+
+(defn- first-closure [ctx]
+  (object-derivation ctx (attribute-derivation ctx #{}))
+  )
+
+(defn- next-closure [closure-operator old-closure lectic-order]
+  (loop [remaining (reverse lectic-order)
+         current-closure old-closure]
+      (if (.contains current-closure (first remaining))
+        (recur (rest remaining)
+               (conj current-closure (first remaining)))
+
+        (if (every? #(< % (first remaining)) (closure-operator (conj current-closure (first remaining))))
+          (closure-operator (conj current-closure (first remaining)))
+          (recur (rest remaining)
+                 current-closure))))
+  )
+
+(defn all-closures [ctx]
+  (let [closure-operator #(object-derivation ctx (attribute-derivation ctx %))
+        lectic-order (into [] (attributes ctx))]
+    (loop [current-closure (first-closure ctx)
+           closures #{}]
+      (if current-closure
+        (recur (next-closure closure-operator current-closure lectic-order)
+               (conj closures current-closure))
+        (conj closures current-closure))))
+  )
+
 
 (def ctx (read-context "resources/bodiesofwater.ctx"))
 (def rctx (ctx-reduce ctx))
 
-(println (count (concepts rctx)))
-(println (objects rctx))
-(println (powerset (objects rctx)))
-(println (extents rctx))
 
-(println (closure-system? (into #{} (objects rctx)) (into #{} (extents rctx))))
+(println (all-closures ctx))
+
+;(println (reverse (sort set/subset? (powerset #{1 2 3 4}))))
+;(println (maximal-closure-system #{1 2 3 4} #{#{1 2 3} #{2 3 4} #{1 2}}))
 
 
