@@ -134,11 +134,12 @@
 (defn- next-closure [closure-operator old-closure lectic-order]
   (loop [remaining (reverse lectic-order)
          current-closure old-closure]
+    (println current-closure remaining)
       (if (.contains current-closure (first remaining))
         (recur (rest remaining)
-               (conj current-closure (first remaining)))
-
-        (if (every? #(< % (first remaining)) (closure-operator (conj current-closure (first remaining))))
+               (disj current-closure (first remaining)))
+        (if (every? #(< (.indexOf lectic-order %) (.indexOf lectic-order (first remaining)))
+                    (set/difference (closure-operator (conj current-closure (first remaining))) current-closure))
           (closure-operator (conj current-closure (first remaining)))
           (recur (rest remaining)
                  current-closure))))
