@@ -26,6 +26,9 @@
 ;clarifying or reducing the context in general has no effect on the structure of the concept lattice.
 (draw-lattice (concept-lattice (reduce-context ctx)))
 
-(def ctx1 (make-context (disj (objects (reduce-context ctx)) "puddle") (attributes (reduce-context ctx)) (incidence-relation (reduce-context ctx))))
-(draw-lattice (concept-lattice ctx1))
-
+;(def ctx1 (make-context (disj (objects (reduce-context ctx)) "puddle") (attributes (reduce-context ctx)) (incidence-relation (reduce-context ctx))))
+;(draw-lattice (concept-lattice ctx1))
+;Removing an object from the reduced lattice collapses all concepts whose extent only differs in the removed object into single vertices.
+;The same analogously applies for attributes.
+(def ctx2 (make-context (objects (reduce-context ctx)) (disj (attributes (reduce-context ctx)) "natural") (incidence-relation (reduce-context ctx))))
+(draw-lattice (concept-lattice ctx2))
