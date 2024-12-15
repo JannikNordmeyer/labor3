@@ -8,6 +8,7 @@
   "Computes the Powerset of the Supplied Set."
   (apply set/union #{a} (map #(powerset (disj a %)) a)))
 
+;Exercise 1, 2:
 (defn- equivalent-objs [ctx obj]
   "Returns all Objects that have the same Incidence as the Supplied Object in the Supplied Context."
   (let [objs (objects ctx)
@@ -79,6 +80,7 @@
     (make-context irreducible-objs irreducible-attrs (incidence-relation clarified-ctx)))
   )
 
+;Exercise 4:
 (defn increasing? [base-set operator]
   (let [pset (powerset base-set)]
     (reduce #(and %1 %2) (for [x pset y pset] (or (not (set/subset? x y)) (set/subset? (operator x) (operator y))))))
@@ -109,24 +111,42 @@
        (intensive? base-set operation))
   )
 
+;Exercise 5:
 (defn closure-system? [base-set subsets]
     (and (every? #(set/subset? % base-set) subsets)
          (every? #(.contains subsets (reduce set/intersection %)) (disj (powerset subsets) #{})))
   )
 
+;Exercise 6:
 (defn minimal-closure-system [base-set subsets]
   "Returns the Minimal Closure System that Contains the Supplied Subsets."
   (into #{} (for [x (disj (powerset subsets) #{})] (reduce set/intersection x)))
   )
 
-(defn maximal-closure-system [base-set subsets]
-  "Returns a Maximal Closure System that is Contained in the Supplied Subsets."
-  (loop [candidates (reverse (sort set/subset? (powerset subsets)))]
-    (if (closure-system? base-set (first candidates))
-      (first candidates)
-      (recur (rest candidates))))
+;Exercise 7:
+(defn- max-set [coll]
+  "Returns an element from the Supplied Collection that is Maximal under Set Inclusion."
+  (loop [remaining (rest coll)
+         current-max (first coll)]
+      (if (empty? remaining)
+        current-max
+        (if (set/subset? current-max (first remaining))
+          (recur (rest remaining)
+                 (first remaining))
+          (recur (rest remaining)
+                 current-max))))
   )
 
+(defn maximal-closure-system [base-set subsets]
+  "Returns a Maximal Closure System that is Contained in the Supplied Subsets."
+  (loop [candidates (powerset subsets)]
+    (let [maximum (max-set candidates)]
+      (if (closure-system? base-set maximum)
+        maximum
+        (recur (disj candidates maximum)))))
+  )
+
+;Exercise 8:
 (defn- first-closure [ctx]
   (object-derivation ctx (attribute-derivation ctx #{}))
   )
@@ -134,36 +154,25 @@
 (defn- next-closure [closure-operator old-closure lectic-order]
   (loop [remaining (reverse lectic-order)
          current-closure old-closure]
-    (println current-closure remaining)
-      (if (.contains current-closure (first remaining))
-        (recur (rest remaining)
-               (disj current-closure (first remaining)))
-        (if (every? #(< (.indexOf lectic-order %) (.indexOf lectic-order (first remaining)))
-                    (set/difference (closure-operator (conj current-closure (first remaining))) current-closure))
-          (closure-operator (conj current-closure (first remaining)))
+      (if (empty? remaining)
+        nil
+        (if (.contains current-closure (first remaining))
           (recur (rest remaining)
-                 current-closure))))
+                (disj current-closure (first remaining)))
+            (if (every? #(>= (.indexOf lectic-order %) (.indexOf lectic-order (first remaining)))
+                        (set/difference (closure-operator (conj current-closure (first remaining))) current-closure))
+              (closure-operator (conj current-closure (first remaining)))
+              (recur (rest remaining)
+                      current-closure)))))
   )
 
 (defn all-closures [ctx]
   (let [closure-operator #(object-derivation ctx (attribute-derivation ctx %))
         lectic-order (into [] (attributes ctx))]
     (loop [current-closure (first-closure ctx)
-           closures #{}]
+           closures #{(first-closure ctx)}]
       (if current-closure
         (recur (next-closure closure-operator current-closure lectic-order)
                (conj closures current-closure))
-        (conj closures current-closure))))
+        (for [intent closures] [(attribute-derivation ctx intent) intent]))))
   )
-
-
-(def ctx (read-context "resources/bodiesofwater.ctx"))
-(def rctx (ctx-reduce ctx))
-
-
-(println (all-closures ctx))
-
-;(println (reverse (sort set/subset? (powerset #{1 2 3 4}))))
-;(println (maximal-closure-system #{1 2 3 4} #{#{1 2 3} #{2 3 4} #{1 2}}))
-
-
